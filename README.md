@@ -1,0 +1,1 @@
+- Don't forget to create secret.h and define WIFI_SSID and WIFI_PASSWORD
