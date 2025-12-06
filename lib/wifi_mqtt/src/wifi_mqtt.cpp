@@ -22,8 +22,17 @@ void setServoTrigger(void (*callback)()) {
 void mqttCallback(char* topic, byte* payload, unsigned int length) {
   DBG_PRINT("MQTT message received on topic: %s\n", topic);
   if (strcmp(topic, mqtt_topic_action) == 0 && servoCallback) {
-    DBG_PRINT("Triggering servo\n");
-    servoCallback();
+    // Check if payload is "resetRainGauge"
+    String msg = "";
+    for (unsigned int i = 0; i < length; i++) {
+      msg += (char)payload[i];
+    }
+    if (msg == "resetRainGauge") {
+      DBG_PRINT("Triggering servo for rain gauge reset\n");
+      servoCallback();
+    } else {
+      DBG_PRINT("Unknown action: %s\n", msg.c_str());
+    }
   }
 }
 
