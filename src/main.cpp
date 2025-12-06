@@ -1,11 +1,13 @@
 #include <Arduino.h>
 
+#define DEBUG 1
 #define SENSOR_READ_INTERVAL 5000
 
 #include "debug.h"
 #include "sensor.h"
 #include "secret.h"
 #include "wifi_mqtt.h"
+#include "servo.h"
 
 void setup() {
   Serial.begin(115200);
@@ -21,6 +23,9 @@ void setup() {
     DBG_PRINT("WiFi not available, continuing without MQTT\n");
   }
 
+  // Initialize ESC
+  servoBegin();
+  setServoTrigger(servoTrigger);
   DBG_PRINT("\n\n=== ESP32 UART Master Ready ===\n");
   DBG_PRINT("Connected to STM32 via UART\n");
   DBG_PRINT("Requesting sensor data every %d seconds...\n\n", SENSOR_READ_INTERVAL / 1000);
