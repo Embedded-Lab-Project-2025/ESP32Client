@@ -1,0 +1,7 @@
+#define WIFI_SSID "WIFI_SSID"
+#define WIFI_PASSWORD "WIFI_PASSWORD"
+#define MQTT_SERVER "MQTT_SERVER"
+#define MQTT_PORT 1883
+#define MQTT_USER "MQTT_USER"
+#define MQTT_TOPIC_DATA "topic/smth"
+#define MQTT_TOPIC_ACTION "topic/smth"

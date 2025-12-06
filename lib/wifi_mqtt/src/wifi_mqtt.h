@@ -12,7 +12,5 @@ void mqttLoop();
 bool mqttReconnect();
 // Publish sensor packet as CSV: temp,hum,ldr,water
 bool publishSensorCSV(const SensorPacket *pkt);
-// Set callback for servo trigger on MQTT "action" topic
-void setServoTrigger(void (*callback)());
 
 #endif // WIFI_MQTT_H

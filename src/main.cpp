@@ -14,24 +14,19 @@ TaskHandle_t sensorTaskHandle;
 TaskHandle_t mqttTaskHandle;
 TaskHandle_t servoTaskHandle;
 
-// Queue for servo trigger
-QueueHandle_t servoQueue;
+// Flag for servo trigger
+volatile bool servoFlag = false;
 
 // Servo task function
 void servoTask(void *pvParameters) {
-  int dummy;
+  servoFlag = false;
   while (1) {
-    if (xQueueReceive(servoQueue, &dummy, portMAX_DELAY)) {
-      servoTrigger();
+    if (servoFlag) {
+      servoTrigger(servoFlag);
+      servoFlag = false;
     }
-    vTaskDelay(10); // Small delay to yield
+    delay(10); // Small delay to yield
   }
-}
-
-// Function to trigger servo via queue
-void triggerServo() {
-  int dummy = 1;
-  xQueueSend(servoQueue, &dummy, 0);
 }
 
 // Sensor task function
@@ -62,7 +57,7 @@ void sensorTask(void *pvParameters) {
         }
         
         DBG_PRINT("Light Level: %.1f%%\n", packet.ldrPercent);
-        DBG_PRINT("Water Level: %.1f%%\n", packet.waterPercent);
+        DBG_PRINT("Water Level: %.1f mm\n", packet.waterPercent * 0.8);
         
         // Raw data for debugging
         DBG_PRINT("Raw: ");
@@ -71,7 +66,7 @@ void sensorTask(void *pvParameters) {
           DBG_PRINT("%02X ", pData[i]);
         }
         DBG_PRINT("\n");
-        // Publish CSV: temperature,humidity,ldrPercent,waterPercent
+        // Publish CSV: temperature,humidity,ldrPercent,waterLevel
         if (!publishSensorCSV(&packet)) {
           
           DBG_PRINT("MQTT publish failed or not connected\n");
@@ -119,11 +114,6 @@ void setup() {
 
   // Initialize servo
   servoBegin();
-  
-  // Create queue for servo
-  servoQueue = xQueueCreate(1, sizeof(int));
-  
-  setServoTrigger(triggerServo);
   DBG_PRINT("\n\n=== ESP32 UART Master Ready ===\n");
   DBG_PRINT("Connected to STM32 via UART\n");
   DBG_PRINT("Requesting sensor data every %d seconds...\n\n", SENSOR_READ_INTERVAL / 1000);

@@ -12,7 +12,8 @@ void servoBegin() {
     DBG_PRINT("Servo attached on pin %d\n", servoPin);
 }
 
-void servoTrigger() {
+void servoTrigger(bool servoFlag) {
+    if (!servoFlag) return;
     DBG_PRINT("Resetting rain gauge\n");
     servo1.write(pourAngle);
     delay(1000);  // Hold to pour
@@ -20,9 +21,9 @@ void servoTrigger() {
     int shakeMax = pourAngle + 15;
     for(int shake = 0; shake < 50; shake++) {
         servo1.write(shakeMin);
-        delay(25);
+        delay(20);
         servo1.write(shakeMax);
-        delay(25);
+        delay(20);
     }
     // Return to rest position
     servo1.write(restAngle);
