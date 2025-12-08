@@ -12,5 +12,9 @@ void mqttLoop();
 bool mqttReconnect();
 // Publish sensor packet as CSV: temp,hum,ldr,water
 bool publishSensorCSV(const SensorPacket *pkt);
+// Check if WiFi is connected
+bool isWifiConnected();
+// Check if MQTT is connected
+bool isMqttConnected();
 
 #endif // WIFI_MQTT_H

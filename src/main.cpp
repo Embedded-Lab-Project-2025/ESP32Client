@@ -8,6 +8,7 @@
 #include "secret.h"
 #include "wifi_mqtt.h"
 #include "servo.h"
+#include "ledStatus.h"
 
 // Task handles
 TaskHandle_t sensorTaskHandle;
@@ -16,6 +17,9 @@ TaskHandle_t servoTaskHandle;
 
 // Flag for servo trigger
 volatile bool servoFlag = false;
+
+// Sensor error flag
+volatile bool sensorErrorFlag = false;
 
 // Servo task function
 void servoTask(void *pvParameters) {
@@ -41,6 +45,7 @@ void sensorTask(void *pvParameters) {
     // Read sensor data
     SensorPacket packet;
     if (readSensorData(&packet)) {
+      sensorErrorFlag = false;
       // Verify checksum
       uint8_t calculatedChecksum = calculateChecksum(&packet);
       
@@ -77,6 +82,7 @@ void sensorTask(void *pvParameters) {
                       calculatedChecksum, packet.checksum);
       }
     } else {
+      sensorErrorFlag = true;
       DBG_PRINT("Failed to read data - timeout or invalid packet\n");
     }
     
@@ -103,6 +109,8 @@ void setup() {
   delay(10);
   DBG_PRINT("\n\n=== ESP32 UART Master Starting ===\n");
 
+  // Initialize LED status
+  ledStatusBegin();
   
   // Initialize UART2 for STM32 communication
   sensorBegin(115200);
@@ -110,6 +118,9 @@ void setup() {
   // Setup WiFi and MQTT (non-blocking with timeout)
   if (!wifiMqttBegin(String(WIFI_SSID), String(WIFI_PASSWORD), 15000)) {
     DBG_PRINT("WiFi not available, continuing without MQTT\n");
+    setLedStatus(STATUS_WIFI_DISCONNECTED);
+  } else {
+    setLedStatus(STATUS_NORMAL);
   }
 
   // Initialize servo
@@ -126,6 +137,17 @@ void setup() {
 }
 
 void loop() {
+  // Update LED status based on current connections
+  LedStatus status = STATUS_NORMAL;
+  if (sensorErrorFlag) {
+    status = STATUS_SENSOR_ERROR;
+  } else if (!isMqttConnected()) {
+    status = STATUS_MQTT_DISCONNECTED;
+  } else if (!isWifiConnected()) {
+    status = STATUS_WIFI_DISCONNECTED;
+  }
+  setLedStatus(status);
+  
   // Main loop can be empty or handle other tasks
   vTaskDelay(1000); // Yield to other tasks
 }

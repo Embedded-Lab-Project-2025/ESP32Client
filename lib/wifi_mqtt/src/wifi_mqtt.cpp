@@ -107,3 +107,11 @@ bool publishSensorCSV(const SensorPacket *pkt) {
     return false;
   }
 }
+
+bool isWifiConnected() {
+  return WiFi.status() == WL_CONNECTED;
+}
+
+bool isMqttConnected() {
+  return mqttClient.connected();
+}
