@@ -5,7 +5,7 @@
 s3servo servo1;
 int servoPin = 14;
 int restAngle = 35;
-int pourAngle = 150;
+int pourAngle = 180;
 
 void servoBegin() {
     servo1.attach(servoPin);
@@ -17,8 +17,8 @@ void servoTrigger(bool servoFlag) {
     DBG_PRINT("Resetting rain gauge\n");
     servo1.write(pourAngle);
     delay(1000);  // Hold to pour
-    int shakeMin = pourAngle - 15;
-    int shakeMax = pourAngle + 15;
+    int shakeMin = pourAngle - 20;
+    int shakeMax = pourAngle - 10;
     for(int shake = 0; shake < 50; shake++) {
         servo1.write(shakeMin);
         delay(20);
